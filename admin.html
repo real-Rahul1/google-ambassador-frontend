@@ -375,21 +375,48 @@ async function submitSession() {
   btn.textContent = 'Saving...';
 
   try {
-    const url = editId ? `/api/admin/sessions/${editId}` : '/api/admin/sessions';
-    const method = editId ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    closeModal();
-    loadSessionsTable();
-    loadOverview();
-    loadSessionSelect();
-  } catch(err) {
-    document.getElementById('modal-alert').innerHTML = `<div class="alert alert-error">⚠️ ${err.message}</div>`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = editId ? 'Save Changes' : 'Create Session';
-  }
+
+  const API = 'https://google-ambassador-backend.onrender.com';
+
+  const url = editId
+    ? `${API}/api/admin/sessions/${editId}`
+    : `${API}/api/admin/sessions`;
+
+  const method = editId ? 'PUT' : 'POST';
+
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) throw new Error(data.error);
+
+  closeModal();
+
+  loadSessionsTable();
+  loadOverview();
+  loadSessionSelect();
+
+} catch(err) {
+
+  document.getElementById('modal-alert').innerHTML =
+    `<div class="alert alert-error">
+      ⚠️ ${err.message}
+    </div>`;
+
+} finally {
+
+  btn.disabled = false;
+  btn.textContent = editId
+    ? 'Save Changes'
+    : 'Create Session';
+
+}
 }
 
 async function toggleSession(id) {
