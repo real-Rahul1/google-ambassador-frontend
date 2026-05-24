@@ -212,7 +212,7 @@
 async function login() {
   const pw = document.getElementById('admin-password').value;
   try {
-    const res = await fetch('https://google-ambassador-backend.onrender.com/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw }) });
+    const res = await fetch('https://google-ambassador-backend.onrender.com/api/admin/login', { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
     showAdminApp();
@@ -222,7 +222,7 @@ async function login() {
 }
 
 async function logout() {
-  await fetch('https://google-ambassador-backend.onrender.com/api/admin/logout', { method:'POST' });
+  await fetch('https://google-ambassador-backend.onrender.com/api/admin/logout', { method:'POST', credentials: 'include' });
   location.reload();
 }
 
@@ -386,6 +386,7 @@ async function submitSession() {
 
   const res = await fetch(url, {
     method,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -420,14 +421,14 @@ async function submitSession() {
 }
 
 async function toggleSession(id) {
-  await fetch(`https://google-ambassador-backend.onrender.com/api/admin/sessions/${id}/toggle`, { method:'PATCH' });
+  await fetch(`https://google-ambassador-backend.onrender.com/api/admin/sessions/${id}/toggle`, { method:'PATCH',credentials: 'include' });
   loadSessionsTable();
   loadOverview();
 }
 
 async function deleteSession(id, title) {
   if (!confirm(`Delete "${title}"? All registrations will also be removed.`)) return;
-  await fetch(`https://google-ambassador-backend.onrender.com/api/admin/sessions/${id}`, { method:'DELETE' });
+  await fetch(`https://google-ambassador-backend.onrender.com/api/admin/sessions/${id}`, { method:'DELETE',credentials: 'include' });
   loadSessionsTable();
   loadOverview();
   loadSessionSelect();
