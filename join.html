@@ -184,7 +184,7 @@ async function submitJoin() {
   btn.textContent = 'Joining...';
 
   try {
-    const res = await fetch('/api/community/join', {
+    const res = await fetch('https://google-ambassador-backend.onrender.com/api/community/join', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)

@@ -70,7 +70,7 @@ fetch('https://google-ambassador-backend.onrender.com/api/sessions')
   .then(r => r.json())
   .then(async sessions => {
     allSessions = await Promise.all(sessions.map(async s => {
-      const detail = await fetch(`/api/sessions/${s._id}`).then(r => r.json()).catch(() => s);
+      const detail = await fetch(`https://google-ambassador-backend.onrender.com/api/sessions/${s._id}`).then(r => r.json()).catch(() => s);
       return { ...s, registrationCount: detail.registrationCount || 0 };
     }));
     renderSessions();
