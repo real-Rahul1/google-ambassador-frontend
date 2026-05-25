@@ -235,7 +235,7 @@ function showAdminApp() {
   loadSessionSelect();
 }
 
-fetch('https://google-ambassador-backend.onrender.com/api/admin/status').then(r => r.json()).then(d => { if (d.isAdmin) showAdminApp(); });
+fetch('https://google-ambassador-backend.onrender.com/api/admin/status',{ credentials: 'include' }).then(r => r.json()).then(d => { if (d.isAdmin) showAdminApp(); });
 
 // ── TABS ──
 function showTab(name, el) {
@@ -250,8 +250,8 @@ function showTab(name, el) {
 async function loadOverview() {
   try {
     const [stats, sessions] = await Promise.all([
-      fetch('https://google-ambassador-backend.onrender.com/api/admin/stats').then(r => r.json()),
-      fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions').then(r => r.json())
+      fetch('https://google-ambassador-backend.onrender.com/api/admin/stats',{ credentials: 'include' }).then(r => r.json()),
+      fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions',{ credentials: 'include' }).then(r => r.json())
     ]);
     document.getElementById('s-total').textContent  = stats.totalSessions;
     document.getElementById('s-active').textContent = stats.activeSessions;
@@ -283,7 +283,7 @@ async function loadSessionsTable() {
   const wrap = document.getElementById('sessions-table-wrap');
   wrap.innerHTML = '<div class="spinner"></div>';
   try {
-    const sessions = await fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions').then(r => r.json());
+    const sessions = await fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions',{ credentials: 'include' }).then(r => r.json());
     if (!sessions.length) {
       wrap.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No sessions yet</h3><p>Click "New Session" to create one.</p></div>`;
       return;
@@ -437,7 +437,7 @@ async function deleteSession(id, title) {
 // ── REGISTRATIONS ──
 async function loadSessionSelect() {
   try {
-    const sessions = await fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions').then(r => r.json());
+    const sessions = await fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions',{ credentials: 'include' }).then(r => r.json());
     const sel = document.getElementById('reg-session-select');
     sel.innerHTML = `<option value="">Choose a session...</option>` +
       sessions.map(s => `<option value="${s._id}">${s.title} (${new Date(s.date).toLocaleDateString('en-IN')})</option>`).join('');
@@ -448,7 +448,7 @@ async function loadCommunity() {
   const wrap = document.getElementById('community-table-wrap');
   wrap.innerHTML = '<div class="spinner"></div>';
   try {
-    const members = await fetch('https://google-ambassador-backend.onrender.com/api/admin/community').then(r => r.json());
+    const members = await fetch('https://google-ambassador-backend.onrender.com/api/admin/community',{ credentials: 'include' }).then(r => r.json());
     if (!members.length) {
       wrap.innerHTML = `<div class="empty"><div class="empty-icon">👥</div><h3>No community members yet</h3><p>Share the Join Community link with students.</p></div>`;
       return;
@@ -474,7 +474,7 @@ async function loadCommunity() {
 }
 
 function exportCommunityCSV() {
-  fetch('https://google-ambassador-backend.onrender.com/api/admin/community')
+  fetch('https://google-ambassador-backend.onrender.com/api/admin/community',{ credentials: 'include' })
     .then(r => r.json())
     .then(members => {
       if (!members.length) return alert('No members to export.');
@@ -500,7 +500,7 @@ async function loadRegistrations() {
   if (!id) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = '<div class="spinner"></div>';
   try {
-    const regs = await fetch(`https://google-ambassador-backend.onrender.com/api/admin/sessions/${id}/registrations`).then(r => r.json());
+    const regs = await fetch(`https://google-ambassador-backend.onrender.com/api/admin/sessions/${id}/registrations`,{ credentials: 'include' }).then(r => r.json());
     if (!regs.length) {
       wrap.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No registrations yet</h3></div>`;
       return;
