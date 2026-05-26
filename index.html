@@ -86,7 +86,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-icon yellow">👥</div>
-      <div><div class="stat-value" id="stat-regs">—</div><div class="stat-label">Registrations</div></div>
+      <div><div class="stat-value" id="stat-regs">—</div><div class="stat-label">Community</div></div>
     </div>
     <div class="stat-card">
       <div class="stat-icon red">🚀</div>
@@ -181,9 +181,9 @@ fetch('https://google-ambassador-backend.onrender.com/api/sessions')
 fetch('https://google-ambassador-backend.onrender.com/api/stats/public')
   .then(r => r.json())
   .then(d => {
-    if (d.totalRegistrations !== undefined)
+    if (d.totalCommunityMembers !== undefined)
       document.getElementById('stat-regs').textContent =
-        d.totalRegistrations;
+        d.totalCommunityMembers;
   })
   .catch(() => {
     document.getElementById('stat-regs').textContent = '—';
