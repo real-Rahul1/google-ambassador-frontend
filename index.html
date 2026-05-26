@@ -209,7 +209,7 @@ function renderCard(s) {
       <div class="session-card-footer">
         <div>
           <div class="capacity-bar"><div class="capacity-fill" style="width:${Math.min(100,(s.registrationCount||0)/s.maxCapacity*100)}%"></div></div>
-          <div class="capacity-text">${s.registrationCount} / ${s.maxCapacity} registered</div>
+          <div class="capacity-text">${s.registrationCount||0} / ${s.maxCapacity} registered</div>
         </div>
         <a href="register.html?session=${s._id}" class="btn btn-primary btn-sm">Register</a>
       </div>
