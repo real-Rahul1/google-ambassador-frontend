@@ -309,11 +309,21 @@ async function loadSessionsTable() {
     }
     wrap.innerHTML = `<div class="table-wrap"><table>
       <thead><tr><th>Title</th><th>Date & Time</th><th>Speaker</th><th>Capacity</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody>${sessions.map(s => `<tr>
-        <td><strong>${s.title}</strong><br><small style="color:var(--text-muted)">${(s.tags||[]).join(', ') || '—'}</small></td>
-        <td>${new Date(s.date).toLocaleDateString('en-IN')}<br><small>${s.time} (${s.duration} min)</small></td>
-        <td>${s.speaker}</td>
-        <td>${s.registrationCount} / ${s.maxCapacity}</td>
+      <tbody>${sessions.map(s => {
+        const title    = s.title    || '(Untitled)';
+        const speaker  = s.speaker  || '—';
+        const time     = s.time     || '—';
+        const duration = s.duration != null ? s.duration : '—';
+        const date     = s.date ? new Date(s.date).toLocaleDateString('en-IN') : '—';
+        const tags     = (s.tags || []).join(', ') || '—';
+        const regCount = s.registrationCount ?? 0;
+        const maxCap   = s.maxCapacity ?? '—';
+        const safeTitleAttr = title.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        return `<tr>
+        <td><strong>${title}</strong><br><small style="color:var(--text-muted)">${tags}</small></td>
+        <td>${date}<br><small>${time} (${duration} min)</small></td>
+        <td>${speaker}</td>
+        <td>${regCount} / ${maxCap}</td>
         <td><span class="badge ${s.isActive ? 'badge-active' : 'badge-inactive'}">${s.isActive ? 'Active' : 'Inactive'}</span></td>
         <td>
           <div class="actions">
@@ -321,10 +331,11 @@ async function loadSessionsTable() {
             <button class="btn btn-sm" style="background:${s.isActive ? '#FEF7E0' : '#E6F4EA'};color:${s.isActive ? '#8C6D00' : '#1E7E34'};" onclick="toggleSession('${s._id}')">
               ${s.isActive ? 'Deactivate' : 'Activate'}
             </button>
-            <button class="btn btn-danger btn-sm" onclick="deleteSession('${s._id}', '${s.title.replace(/'/g,"\\'")}')">Delete</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteSession('${s._id}', '${safeTitleAttr}')">Delete</button>
           </div>
         </td>
-      </tr>`).join('')}</tbody>
+      </tr>`;
+      }).join('')}</tbody>
     </table></div>`;
   } catch(e) {
     console.error('loadSessionsTable error:', e);
