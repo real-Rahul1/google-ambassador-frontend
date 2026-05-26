@@ -561,8 +561,8 @@ async function loadRegistrations() {
       return;
     }
     wrap.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>College</th><th>Branch</th><th>Year</th><th>Experience</th><th>Registered</th></tr></thead>
-      <tbody>${regs.map((r, i) => `<tr>
+      <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>College</th><th>Branch</th><th>Year</th><th>Experience</th><th>Registered</th><th>Action</th></tr></thead>
+      <tbody>${regs.map((r, i) => `<tr id="reg-row-${r._id}">
         <td>${i+1}</td>
         <td><strong>${r.fullName}</strong></td>
         <td>${r.email}</td>
@@ -572,11 +572,39 @@ async function loadRegistrations() {
         <td>${r.year}</td>
         <td><span class="badge" style="background:${r.experience==='advanced'?'#E8F0FE':r.experience==='intermediate'?'#FEF7E0':'#E6F4EA'};color:${r.experience==='advanced'?'var(--google-blue)':r.experience==='intermediate'?'#8C6D00':'#1E7E34'}">${r.experience}</span></td>
         <td>${new Date(r.registeredAt).toLocaleDateString('en-IN')}</td>
+        <td><button onclick="deleteRegistration('${r._id}', '${r.fullName.replace(/'/g, "\\'")}')" style="background:#FCE8E6;color:#C5221F;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;font-weight:600;">🗑 Delete</button></td>
       </tr>`).join('')}</tbody>
     </table></div>
     <div style="margin-top:12px;font-size:.85rem;color:var(--text-muted);">${regs.length} registration${regs.length !== 1 ? 's' : ''} total</div>`;
   } catch(e) {
     wrap.innerHTML = `<div class="alert alert-error">Failed to load registrations</div>`;
+  }
+}
+
+async function deleteRegistration(regId, name) {
+  if (!confirm(`Delete registration for "${name}"? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`https://google-ambassador-backend.onrender.com/api/admin/registrations/${regId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (data.success) {
+      const row = document.getElementById(`reg-row-${regId}`);
+      if (row) row.remove();
+      // Update the count label
+      const wrap = document.getElementById('registrations-table-wrap');
+      const rows = wrap.querySelectorAll('tbody tr');
+      const label = wrap.querySelector('div[style*="margin-top"]');
+      if (label) label.textContent = `${rows.length} registration${rows.length !== 1 ? 's' : ''} total`;
+      if (!rows.length) {
+        wrap.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No registrations yet</h3></div>`;
+      }
+    } else {
+      alert('Failed to delete: ' + (data.error || 'Unknown error'));
+    }
+  } catch(e) {
+    alert('Network error while deleting registration.');
   }
 }
 </script>
