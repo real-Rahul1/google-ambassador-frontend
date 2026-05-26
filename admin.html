@@ -93,6 +93,7 @@
           <div class="stat-card"><div class="stat-icon blue">📅</div><div><div class="stat-value" id="s-total">—</div><div class="stat-label">Total Sessions</div></div></div>
           <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="s-active">—</div><div class="stat-label">Active Sessions</div></div></div>
           <div class="stat-card"><div class="stat-icon yellow">👥</div><div><div class="stat-value" id="s-regs">—</div><div class="stat-label">Total Registrations</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#E8F0FE;">🤝</div><div><div class="stat-value" id="s-community">—</div><div class="stat-label">Community Members</div></div></div>
         </div>
         <div class="section-title" style="margin-bottom:12px;">Recent Sessions</div>
         <div id="overview-sessions"><div class="spinner"></div></div>
@@ -249,18 +250,26 @@ function showTab(name, el) {
 // ── OVERVIEW ──
 async function loadOverview() {
   try {
-    const [stats, sessions] = await Promise.all([
-      fetch('https://google-ambassador-backend.onrender.com/api/admin/stats',{ credentials: 'include' }).then(r => r.json()),
-      fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions',{ credentials: 'include' }).then(r => r.json())
+    const [statsRes, sessionsRes] = await Promise.all([
+      fetch('https://google-ambassador-backend.onrender.com/api/admin/stats',{ credentials: 'include' }),
+      fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions',{ credentials: 'include' })
     ]);
+    if (!statsRes.ok || !sessionsRes.ok) throw new Error('Unauthorized or server error');
+    const stats = await statsRes.json();
+    const allSessions = await sessionsRes.json();
+
     document.getElementById('s-total').textContent  = stats.totalSessions;
     document.getElementById('s-active').textContent = stats.activeSessions;
     document.getElementById('s-regs').textContent   = stats.totalRegistrations;
-    if (stats.totalCommunityMembers !== undefined) document.getElementById('s-community').textContent = stats.totalCommunityMembers;
+    document.getElementById('s-community').textContent = stats.totalCommunityMembers ?? '—';
+
+    // Filter to only upcoming (today or future) sessions
+    const today = new Date(); today.setHours(0,0,0,0);
+    const sessions = allSessions.filter(s => new Date(s.date) >= today);
 
     const wrap = document.getElementById('overview-sessions');
     if (!sessions.length) {
-      wrap.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No sessions yet</h3><p>Create your first session.</p></div>`;
+      wrap.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No upcoming sessions</h3><p>Create your first session.</p></div>`;
       return;
     }
     wrap.innerHTML = `<div class="table-wrap"><table>
@@ -274,7 +283,8 @@ async function loadOverview() {
       </tr>`).join('')}</tbody>
     </table></div>`;
   } catch(e) {
-    document.getElementById('overview-sessions').innerHTML = `<div class="alert alert-error">Failed to load data</div>`;
+    document.getElementById('overview-sessions').innerHTML = `<div class="alert alert-error">⚠️ Failed to load data. Please ensure you are logged in.</div>`;
+    ['s-total','s-active','s-regs','s-community'].forEach(id => document.getElementById(id).textContent = '—');
   }
 }
 
@@ -323,6 +333,9 @@ function openCreateModal() {
   });
   document.getElementById('f-capacity').value = '100';
   document.getElementById('modal-alert').innerHTML = '';
+  // Prevent selecting past dates
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('f-date').min = todayStr;
   document.getElementById('session-modal').classList.add('open');
 }
 
@@ -368,6 +381,15 @@ async function submitSession() {
   if (!body.title || !body.description || !body.speaker || !body.venue || !body.date || !body.time || !body.duration) {
     document.getElementById('modal-alert').innerHTML = `<div class="alert alert-error">⚠️ Please fill in all required fields.</div>`;
     return;
+  }
+
+  // Prevent past dates on create
+  if (!editId) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (new Date(body.date) < today) {
+      document.getElementById('modal-alert').innerHTML = `<div class="alert alert-error">⚠️ Session date cannot be in the past.</div>`;
+      return;
+    }
   }
 
   const btn = document.getElementById('modal-submit-btn');
@@ -454,7 +476,7 @@ async function loadCommunity() {
       return;
     }
     wrap.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>College</th><th>Branch</th><th>Year</th><th>Experience</th><th>Interests</th><th>Joined</th></tr></thead>
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>College</th><th>Branch</th><th>Year</th><th>Experience</th><th>Interests</th><th>Joined</th><th>Actions</th></tr></thead>
       <tbody>${members.map(m => `<tr>
         <td><strong>${m.fullName}</strong></td>
         <td style="font-size:0.8rem;">${m.email}</td>
@@ -465,11 +487,23 @@ async function loadCommunity() {
         <td><span class="badge badge-active" style="text-transform:capitalize;">${m.experience}</span></td>
         <td style="font-size:0.8rem;">${(m.interests||[]).join(', ') || '—'}</td>
         <td style="font-size:0.8rem;">${new Date(m.joinedAt).toLocaleDateString('en-IN')}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteCommunityMember('${m._id}', '${m.fullName.replace(/'/g,"\\'")}')">Delete</button></td>
       </tr>`).join('')}</tbody>
     </table></div>
     <div style="margin-top:10px;color:var(--text-muted);font-size:0.85rem;">${members.length} member${members.length !== 1 ? 's' : ''} total</div>`;
   } catch(e) {
     wrap.innerHTML = `<div class="alert alert-error">Failed to load community members</div>`;
+  }
+}
+
+async function deleteCommunityMember(id, name) {
+  if (!confirm(`Remove "${name}" from the community? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`https://google-ambassador-backend.onrender.com/api/admin/community/${id}`, { method: 'DELETE', credentials: 'include' });
+    if (!res.ok) throw new Error('Failed to delete');
+    loadCommunity();
+  } catch(e) {
+    alert('Error: ' + e.message);
   }
 }
 
