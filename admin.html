@@ -293,8 +293,17 @@ async function loadSessionsTable() {
   const wrap = document.getElementById('sessions-table-wrap');
   wrap.innerHTML = '<div class="spinner"></div>';
   try {
-    const sessions = await fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions',{ credentials: 'include' }).then(r => r.json());
-    if (!sessions.length) {
+    const res = await fetch('https://google-ambassador-backend.onrender.com/api/admin/sessions', { credentials: 'include' });
+    if (!res.ok) {
+      if (res.status === 401) {
+        wrap.innerHTML = `<div class="alert alert-error">⚠️ Session expired. Please <a href="#" onclick="logout()">log in again</a>.</div>`;
+      } else {
+        wrap.innerHTML = `<div class="alert alert-error">Failed to load sessions (HTTP ${res.status}). Please try again.</div>`;
+      }
+      return;
+    }
+    const sessions = await res.json();
+    if (!Array.isArray(sessions) || !sessions.length) {
       wrap.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No sessions yet</h3><p>Click "New Session" to create one.</p></div>`;
       return;
     }
@@ -318,7 +327,8 @@ async function loadSessionsTable() {
       </tr>`).join('')}</tbody>
     </table></div>`;
   } catch(e) {
-    wrap.innerHTML = `<div class="alert alert-error">Failed to load sessions</div>`;
+    console.error('loadSessionsTable error:', e);
+    wrap.innerHTML = `<div class="alert alert-error">Failed to load sessions: ${e.message}. Check your connection and try refreshing.</div>`;
   }
 }
 
