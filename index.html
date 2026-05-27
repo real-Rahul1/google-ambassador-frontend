@@ -27,6 +27,142 @@
     .whatsapp a img{height: 50px;}
     .linkedin a img{height: 30px;}
 
+    #certificate-cont {
+  position: relative;
+  overflow: hidden;
+}
+
+#certificate {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transform: translateY(-110%);
+  transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+  z-index: 10;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
+}
+
+#certificate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+#certificate-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+#certificate-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+
+#certificate-close:hover {
+  background: var(--surface-3);
+}
+
+#certificate-body {
+  width: 100%;
+}
+#certificate-body img{
+  width: 100%;
+}
+
+#certificate-cert-title {
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+#certificate-cert-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+#certificate-cert-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+#certificate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--google-blue);
+  border: 1px solid var(--blue-100);
+}
+
+.cert-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.cert-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: block;
+}
+
+#certificate-text {
+  position: relative;
+}
+
+#certificate-btn-cont {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+#certificate-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--google-blue);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+#certificate-btn:hover {
+  background: var(--blue-600);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
     @media only screen and (max-width: 768px){
       .cta-section { flex-direction: column; }
       .admin-pic { width: 50vw; height: auto; }
@@ -101,11 +237,28 @@
         <h3>Expert-Led Sessions</h3>
         <p>Learn from Google Ambassadors with hands-on expertise in Google Cloud, AI/ML, Firebase, and more.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon" style="background:#E6F4EA;">📜</div>
-        <h3>Earn Recognition and Certificates</h3>
-        <p>Attend sessions and earn certificates that validate your learning journey with Google technologies.</p>
-      </div>
+      <div class="feature-card" id="certificate-cont">
+
+  <div id="certificate">
+    <div id="certificate-header">
+      <span id="certificate-label">Your Certificate</span>
+      <button id="certificate-close">&times;</button>
+    </div>
+    <div id="certificate-body">
+      <img src="gsa-certificate.jpeg" alt="">
+    </div>
+  </div>
+
+  <div id="certificate-text">
+    <div class="feature-icon" style="background:#E6F4EA;">📜</div>
+    <h3>Earn Recognition and Certificates</h3>
+    <p>Attend sessions and earn certificates that validate your learning journey with Google technologies.</p>
+    <div id="certificate-btn-cont">
+      <div id="certificate-btn">view &rarr;</div>
+    </div>
+  </div>
+
+</div>
       <div class="feature-card">
         <div class="feature-icon" style="background:#FEF7E0;">🤝</div>
         <h3>Build Network</h3>
@@ -215,6 +368,18 @@ function renderCard(s) {
       </div>
     </div>`;
 }
+
+const certOverlay = document.getElementById('certificate');
+const certCard = document.getElementById('certificate-cont');
+
+document.getElementById('certificate-btn').addEventListener('click', () => {
+  certCard.style.minHeight = certCard.offsetHeight + 'px';
+  certOverlay.style.transform = 'translateY(0)';
+});
+
+document.getElementById('certificate-close').addEventListener('click', () => {
+  certOverlay.style.transform = 'translateY(-110%)';
+});
 </script>
 </body>
 </html>
