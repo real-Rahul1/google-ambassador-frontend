@@ -73,6 +73,15 @@ fetch('https://google-ambassador-backend.onrender.com/api/sessions')
       const detail = await fetch(`https://google-ambassador-backend.onrender.com/api/sessions/${s._id}`).then(r => r.json()).catch(() => s);
       return { ...s, registrationCount: detail.registrationCount || 0 };
     }));
+    const now = new Date();
+    allSessions.sort((a, b) => {
+      const aUp = new Date(a.date) >= now;
+      const bUp = new Date(b.date) >= now;
+      if (aUp && !bUp) return -1;   // upcoming before past
+      if (!aUp && bUp) return 1;
+      if (aUp && bUp) return new Date(a.date) - new Date(b.date);  // upcoming: soonest first
+      return new Date(b.date) - new Date(a.date);  // past: most recent first
+    });
     renderSessions();
   }).catch(() => {
     document.getElementById('sessions-grid').innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><h3>Failed to load sessions</h3><p>Please check your server connection.</p></div>`;

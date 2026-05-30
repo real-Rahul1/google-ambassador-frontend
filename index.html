@@ -319,9 +319,10 @@ fetch('https://google-ambassador-backend.onrender.com/api/sessions')
   .then(r => r.json())
   .then(sessions => {
     document.getElementById('stat-sessions').textContent = sessions.length;
-    document.getElementById('stat-active').textContent = sessions.filter(s => s.isActive).length;
+    const now = new Date();
+    document.getElementById('stat-active').textContent = sessions.filter(s => new Date(s.date) >= now).length;
     const container = document.getElementById('preview-sessions');
-    const upcoming = sessions.slice(0, 3);
+    const upcoming = sessions.filter(s => new Date(s.date) >= now).slice(0, 3);
     if (!upcoming.length) {
       container.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📅</div><h3>No sessions yet</h3><p>Check back soon.</p></div>`;
       return;
