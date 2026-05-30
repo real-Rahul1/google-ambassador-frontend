@@ -364,7 +364,11 @@ function renderCard(s) {
           <div class="capacity-bar"><div class="capacity-fill" style="width:${Math.min(100,(s.registrationCount||0)/s.maxCapacity*100)}%"></div></div>
           <div class="capacity-text">${s.registrationCount||0} / ${s.maxCapacity} registered</div>
         </div>
-        <a href="register.html?session=${s._id}" class="btn btn-primary btn-sm">Register</a>
+        ${new Date(s.date) < new Date()
+          ? `<span style="font-size:.8rem;color:var(--text-muted)">Session ended</span>`
+          : (s.registrationCount||0) >= s.maxCapacity
+            ? `<span class="btn btn-sm" style="background:var(--surface-3);color:var(--text-muted);cursor:default;">Full</span>`
+            : `<a href="register.html?session=${s._id}" class="btn btn-primary btn-sm">Register</a>`}
       </div>
     </div>`;
 }
